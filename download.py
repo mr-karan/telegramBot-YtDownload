@@ -37,10 +37,29 @@ def my_hook(d):
 
 #download and strip to mp3
 
-def downloadMp3(urlGiven):
-    p=subprocess.check_output("youtube-dl"+urlGiven+" --youtube-skip-dash-manifest --extract-audio --audio-format mp3 --audio-quality 0 -o '%(title)s-%(id)s.%(ext)s' --restrict-filenames --download --get-filename".split()).decode("utf-8").strip("\n")
-    filename=p.replace(p[-4:-1],"mp3")
+#download and strip to mp3
+def getfilename(urlGiven):
+    p=subprocess.check_output(["youtube-dl",urlGiven, "--youtube-skip-dash-manifest","--extract-audio","--audio-format","mp3","--audio-quality","0" ,"-o","'%(title)s-%(id)s.%(ext)s'","--restrict-filenames","--get-filename"]).decode("utf-8").strip("\n")
+    ext=p.split(".")
+    ext[1]="mp3"
+    filename=ext[0]+"."+ext[1]
     return filename
+    
+
+
+def downloadMp3(urlGiven):
+    p=subprocess.check_output(["youtube-dl",urlGiven, "--youtube-skip-dash-manifest","--extract-audio","--audio-format","mp3","--audio-quality","0" ,"-o","'%(title)s-%(id)s.%(ext)s'","--restrict-filenames","--download"])
+    return p
+
+def sendMessage(chat_id, text):
+    payload = {'chat_id': chat_id, 'text': text}
+    requests.post(API_URL+'sendMessage', data=payload)
+    
+def sendDocument(chat_id, filename):
+    payload = {'chat_id': chat_id}
+    file = {'document': open(filename,'rb')}
+    requests.post(API_URL + "sendDocument", params=payload, files=file)
+
 
 
 def sendMessage(chat_id, text):
