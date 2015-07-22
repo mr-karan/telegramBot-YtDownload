@@ -55,6 +55,14 @@ def downloadMp3(urlGiven):
 def sendMessage(chat_id, text):
     payload = {'chat_id': chat_id, 'text': text}
     requests.post(API_URL+'sendMessage', data=payload)
+    
+def sendDocument(chat_id, file):
+    payload = {'chat_id': chat_id}
+    songfile=open('song_title.txt', 'r')
+    fileName=songfile.read().splitlines()
+    nameoffile=fileName[0]+'.mp3'
+    file = {'document': open(nameoffile,'rb')}
+    requests.post(API_URL + "sendDocument", params=payload, files=file)
 
 #downloadMp3()
 if __name__ == '__main__':
