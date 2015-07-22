@@ -8,7 +8,7 @@ import re
 import json
 
 logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger('nbt')
+log = logging.getLogger('musicBot')
 try:
     with open('last_updated.txt', 'r') as f:
         try:
@@ -38,19 +38,10 @@ def my_hook(d):
 #download and strip to mp3
 
 def downloadMp3(urlGiven):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    'progress_hooks': [my_hook],
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        result=ydl.extract_info(urlGiven,download=False)
-        urlPost=result['url']
-        return urlPost
+    p=subprocess.check_output("youtube-dl"+urlGiven+" --youtube-skip-dash-manifest --extract-audio --audio-format mp3 --audio-quality 0 -o '%(title)s-%(id)s.%(ext)s' --restrict-filenames --download --get-filename".split()).decode("utf-8").strip("\n")
+    filename=p.replace(p[-4:-1],"mp3")
+    return filename
+
 
 def sendMessage(chat_id, text):
     payload = {'chat_id': chat_id, 'text': text}
