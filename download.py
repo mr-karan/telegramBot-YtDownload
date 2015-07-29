@@ -72,14 +72,19 @@ if __name__ == '__main__':
                 chat_sender_id = req['message']['chat']['id']
                 chat_text = req['message']['text']
                 log.debug('Chat text received: {0}'.format(chat_text))
-                urlGiven=chat_text
-                downloadMp3(urlGiven)
                 fileOpen=open('last_updated.txt', 'r')
+                urlGiven=chat_text
+                try:
+                    downloadMp3(urlGiven)
+                except youtube_dl.utils.DownloadError
+                    sendMessage(chat_sender_id,"Please enter correct youtube.com URL only.Mobile links not supported as of now ")
+                    last_updated = req['update_id']
+
                 with open('song_name.txt','r') as f:
                     filename=f.read()
-                sendDocument(chat_sender_id,filename)
+                    sendDocument(chat_sender_id,filename)
                 last_updated = req['update_id']
-                
+
                 fileOpen.close()
                 if chat_text == '/stop':
                     log.debug('Added {0} to skip list'.format(chat_sender_id))
