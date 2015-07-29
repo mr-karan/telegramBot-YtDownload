@@ -23,7 +23,7 @@ skip_list = []
 #URL=sys.argv[1]
 
 #DONOT COMMIT API KEY. USE os.environ instead
-API_URL=""
+API_URL=os.environ['TELEGRAM_BOT']
 
 def get_updates():
     log.debug('Checking for requests')
@@ -39,12 +39,26 @@ def my_hook(d):
 
 #download and strip to mp3
 def getfilename(urlGiven):
-    p=subprocess.check_output(["youtube-dl",urlGiven, "--youtube-skip-dash-manifest","--extract-audio","--audio-format","mp3","--audio-quality","0" ,"-o","'%(title)s-%(id)s.%(ext)s'","--restrict-filenames","--get-filename"]).decode("utf-8").strip("\n")
+    ydl_opts = {
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'logger': MyLogger(),
+    'progress_hooks': [my_hook],
+}
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download(['http://www.youtube.com/watch?v=BaW_jenozKc'])
+
+    '''p=subprocess.check_output(["youtube-dl",urlGiven, "--youtube-skip-dash-manifest","--extract-audio","--audio-format","mp3","--audio-quality","0" ,"-o","'%(title)s-%(id)s.%(ext)s'","--restrict-filenames","--get-filename"]).decode("utf-8").strip("\n")
     ext=p.split(".")
     ext[1]="mp3"
     filename=ext[0]+"."+ext[1]
     return filename
-    
+    '''
+
 
 
 def downloadMp3(urlGiven):
@@ -54,7 +68,7 @@ def downloadMp3(urlGiven):
 def sendMessage(chat_id, text):
     payload = {'chat_id': chat_id, 'text': text}
     requests.post(API_URL+'sendMessage', data=payload)
-    
+
 def sendDocument(chat_id, filename):
     payload = {'chat_id': chat_id}
     file = {'document': open(filename,'rb')}
@@ -65,7 +79,7 @@ def sendDocument(chat_id, filename):
 def sendMessage(chat_id, text):
     payload = {'chat_id': chat_id, 'text': text}
     requests.post(API_URL+'sendMessage', data=payload)
-    
+
 def sendDocument(chat_id, file):
     payload = {'chat_id': chat_id}
     songfile=open('song_title.txt', 'r')
