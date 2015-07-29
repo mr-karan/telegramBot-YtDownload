@@ -21,15 +21,17 @@ except FileNotFoundError:
     last_updated = 0
 
 skip_list = []
-sources_dict = {}
+
 #URL=sys.argv[1]
 
 #DONOT COMMIT API KEY. USE os.environ instead
-API_URL="https://api.telegram.org/bot119926534:AAGiI4YRpRkA47wF-jkm5itLJUCS8FubGFg/"
+
+BOT_KEY = os.environ['YTBOT_ACCESS_TOKEN']
+API_BASE = 'https://api.telegram.org/bot'
 
 def get_updates():
     log.debug('Checking for requests')
-    return json.loads(requests.get(API_URL + 'getUpdates', params={'offset': last_updated+1}).text)
+    return json.loads(requests.get(API_BASE + BOT_KEY + '/getUpdates', params={'offset': last_updated+1}).text)
 
 
 def my_hook(d):
@@ -77,6 +79,7 @@ if __name__ == '__main__':
                     filename=f.read()
                 sendDocument(chat_sender_id,filename)
                 last_updated = req['update_id']
+                
                 fileOpen.close()
                 if chat_text == '/stop':
                     log.debug('Added {0} to skip list'.format(chat_sender_id))
