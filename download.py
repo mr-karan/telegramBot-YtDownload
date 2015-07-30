@@ -30,7 +30,6 @@ skip_list = []
 
 BOT_KEY = os.environ['YTBOT_ACCESS_TOKEN']
 API_BASE = 'https://api.telegram.org/bot'
-
 def validurl(url):
     parsed=urlparse(url)
     new=parsed._replace(netloc="youtube.com")
@@ -46,9 +45,11 @@ def my_hook(d):
         #sendMessage(chat_sender_id,"Wait for a few moments, please")
         #last_updated = req['update_id']
 
-    filename=d['filename'].split(".")[0]+".mp3"
+    filename, file_extension = os.path.splitext(d['filename'])
+    file_extension='.mp3'
+    finalname=filename+file_extension
     with open('song_name.txt', 'w') as f:
-        f.write(str(filename))
+        f.write(str(finalname))
 
 def downloadMp3(urlGiven):
     ydl_opts = {
