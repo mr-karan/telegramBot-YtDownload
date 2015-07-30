@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+from urllib.parse import urlparse,urlsplit
+
 import youtube_dl
 import sys
 import os
@@ -29,12 +31,21 @@ skip_list = []
 BOT_KEY = os.environ['YTBOT_ACCESS_TOKEN']
 API_BASE = 'https://api.telegram.org/bot'
 
+def validurl(url):
+    parsed=urlparse(url)
+    new=parsed._replace(netloc="youtube.com")
+    return new.geturl()
+
 def get_updates():
     log.debug('Checking for requests')
     return json.loads(requests.get(API_BASE + BOT_KEY + '/getUpdates', params={'offset': last_updated+1}).text)
 
 
 def my_hook(d):
+    #if d['status']=='downloading':
+        #sendMessage(chat_sender_id,"Wait for a few moments, please")
+        #last_updated = req['update_id']
+
     filename=d['filename'].split(".")[0]+".mp3"
     with open('song_name.txt', 'w') as f:
         f.write(str(filename))
@@ -54,12 +65,12 @@ def downloadMp3(urlGiven):
 
 def sendMessage(chat_id, text):
     payload = {'chat_id': chat_id, 'text': text}
-    requests.post(API_URL+'sendMessage', data=payload)
+    requests.post(API_BASE + BOT_KEY+'/sendMessage', data=payload)
 
 def sendDocument(chat_id, filename):
     payload = {'chat_id': chat_id}
     file = {'document': open(filename,'rb')}
-    requests.post(API_URL + "sendDocument", params=payload, files=file)
+    requests.post(API_BASE + BOT_KEY + "/sendDocument", params=payload, files=file)
 
 #downloadMp3()
 if __name__ == '__main__':
@@ -72,20 +83,23 @@ if __name__ == '__main__':
                 chat_sender_id = req['message']['chat']['id']
                 chat_text = req['message']['text']
                 log.debug('Chat text received: {0}'.format(chat_text))
-                fileOpen=open('last_updated.txt', 'r')
-                urlGiven=chat_text
+                urlGiven=validurl(chat_text)
+                #fileOpen=open('last_updated.txt', 'r')
                 try:
                     downloadMp3(urlGiven)
-                except youtube_dl.utils.DownloadError
+                except youtube_dl.utils.DownloadError:
                     sendMessage(chat_sender_id,"Please enter correct youtube.com URL only.Mobile links not supported as of now ")
                     last_updated = req['update_id']
 
                 with open('song_name.txt','r') as f:
                     filename=f.read()
                     sendDocument(chat_sender_id,filename)
+
+
+
                 last_updated = req['update_id']
 
-                fileOpen.close()
+                #fileOpen.close()
                 if chat_text == '/stop':
                     log.debug('Added {0} to skip list'.format(chat_sender_id))
                     skip_list.append(chat_sender_id)
