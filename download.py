@@ -31,7 +31,7 @@ skip_list = []
 BOT_KEY = os.environ['YTBOT_ACCESS_TOKEN']
 API_BASE = 'https://api.telegram.org/bot'
 def validurl(url):
-   try:
+    try:
         valid=requests.get(url)
         return valid.url
     except requests.exceptions.MissingSchema:
