@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from urllib.parse import urlparse,urlsplit
-
 import youtube_dl
 import sys
 import os
@@ -45,7 +44,6 @@ def my_hook(d):
     #if d['status']=='downloading':
         #sendMessage(chat_sender_id,"Wait for a few moments, please")
         #last_updated = req['update_id']
-
     filename, file_extension = os.path.splitext(d['filename'])
     file_extension='.mp3'
     finalname=filename+file_extension
@@ -86,7 +84,7 @@ if __name__ == '__main__':
                 chat_text = req['message']['text']
                 log.debug('Chat text received: {0}'.format(chat_text))
                 urlGiven=validurl(chat_text)
-                #fileOpen=open('last_updated.txt', 'r')
+                fileOpen=open('last_updated.txt', 'r')
                 try:
                     downloadMp3(urlGiven)
                 except youtube_dl.utils.DownloadError:
@@ -97,11 +95,9 @@ if __name__ == '__main__':
                     filename=f.read()
                     sendDocument(chat_sender_id,filename)
 
-
-
                 last_updated = req['update_id']
 
-                #fileOpen.close()
+                fileOpen.close()
                 if chat_text == '/stop':
                     log.debug('Added {0} to skip list'.format(chat_sender_id))
                     skip_list.append(chat_sender_id)
