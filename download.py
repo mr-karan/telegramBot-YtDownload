@@ -80,45 +80,56 @@ file = {
 }
 requests.post(API_BASE + BOT_KEY + "/sendDocument", params = payload, files = file)
 
-# downloadMp3()
 if __name__ == '__main__':
     log.debug('Starting up')
-log.debug('Last updated id: {0}'.format(last_updated))
-while (True):
-    r = get_updates()
-if r['ok']:
-    for req in r['result']:
-    chat_sender_id = req['message']['chat']['id']
-chat_text = req['message']['text']
-log.debug('Chat text received: {0}'.format(chat_text))
-urlGiven = validurl(chat_text)
-fileOpen = open('last_updated.txt', 'r')
-try:
-downloadMp3(urlGiven)
-except youtube_dl.utils.DownloadError:
-    sendMessage(chat_sender_id, "Please enter correct youtube.com URL only.Mobile links not supported as of now ")
-last_updated = req['update_id']
+    log.debug('Last updated id: {0}'.format(last_updated))
+    while (True):
+        r = get_updates()
+        if r['ok']:
+            for req in r['result']:
+                chat_sender_id = req['message']['chat']['id']
+                chat_text = req['message']['text']
+                log.debug('Chat text received: {0}'.format(chat_text))
+                urlGiven=validurl(chat_text)
+                fileOpen=open('last_updated.txt', 'r')
+                try:
+                    downloadMp3(urlGiven)
+                except TypeError:
+                    sendMessage(chat_sender_id,"Please enter correct youtube.com URL only.Mobile links not supported as of now ")
+                    last_updated = req['update_id']
 
-with open('song_name.txt', 'r') as f:
-    filename = f.read()
-sendDocument(chat_sender_id, filename)
+                with open('song_name.txt','r') as f:
+                    filename=f.read()
+                    try:
+                        sendDocument(chat_sender_id,filename)
+                        last_updated = req['update_id']
 
-last_updated = req['update_id']
+                    except FileNotFoundError:
+                        sendMessage(chat_sender_id,"Goof up. Could not find the file")
+                        last_updated = req['update_id']
+                        
+                    
+                
+                
+                
+                #last_updated = req['update_id']
+                
+                fileOpen.close()
+                if chat_text == '/stop':
+                    log.debug('Added {0} to skip list'.format(chat_sender_id))
+                    skip_list.append(chat_sender_id)
+                    last_updated = req['update_id']
+                    sendMessage(chat_sender_id, "Ok, we won't send you any more messages.")
 
-fileOpen.close()
-if chat_text == '/stop':
-    log.debug('Added {0} to skip list'.format(chat_sender_id))
-skip_list.append(chat_sender_id)
-last_updated = req['update_id']
-sendMessage(chat_sender_id, "Ok, we won't send you any more messages.")
+                if chat_text == '/start':
+                    helptext = '''
+                        Hi! This is Music Downloader Bot
+                    '''
+                    sendMessage(chat_sender_id, helptext)
+                    last_updated = req['update_id']
 
-if chat_text == '/start':
-    helptext = '''Hi!This is Music Downloader Bot '''
-sendMessage(chat_sender_id, helptext)
-last_updated = req['update_id']
-
-with open('last_updated.txt', 'w') as f:
-    f.write(str(last_updated))
-log.debug(
-    'Updated last_updated to {0}'.format(last_updated))
-f.close()
+                with open('last_updated.txt', 'w') as f:
+                    f.write(str(last_updated))
+                    log.debug(
+                        'Updated last_updated to {0}'.format(last_updated))
+                f.close()
